@@ -38,6 +38,8 @@ horizontal_dataset_2.zip
 03_models/**/events.*
 03_models/**/*.csv
 03_models/**/*.png
+03_models/**/*.jpg
+03_models/**/*.json
 03_models/**/*.yaml
 !03_models/.gitkeep
 
