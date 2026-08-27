@@ -25,8 +25,10 @@ Thumbs.db
 desktop.ini
 
 # === Data (too large for git) ===
-01_raw_data/
-02_yolo_dataset/
+01_raw_data/*
+!01_raw_data/.gitkeep
+02_yolo_dataset/*
+!02_yolo_dataset/.gitkeep
 02_yolo_dataset.zip
 horizontal_dataset_2.zip
 *.zip
@@ -44,12 +46,13 @@ horizontal_dataset_2.zip
 !03_models/.gitkeep
 
 # === Inference results ===
-06_inference_results/
-06_reports/
+06_inference_results/*
+!06_inference_results/.gitkeep
+06_reports/*
+!06_reports/.gitkeep
 
 # === Jupyter ===
 .ipynb_checkpoints/
-*.ipynb
 
 # === Practice docs (personal) ===
 *.docx
