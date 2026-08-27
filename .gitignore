@@ -1,0 +1,61 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# === Virtual Environment ===
+venv/
+.venv/
+env/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Data (too large for git) ===
+01_raw_data/
+02_yolo_dataset/
+02_yolo_dataset.zip
+horizontal_dataset_2.zip
+*.zip
+
+# === Models (too large for git) ===
+03_models/**/*.pt
+03_models/**/*.onnx
+03_models/**/weights/
+03_models/**/events.*
+03_models/**/*.csv
+03_models/**/*.png
+03_models/**/*.yaml
+!03_models/.gitkeep
+
+# === Inference results ===
+06_inference_results/
+06_reports/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+*.ipynb
+
+# === Practice docs (personal) ===
+*.docx
+*.txt
+!requirements.txt
+!README.md
+
+# === Misc ===
+*.log
+token.json
+credentials.json

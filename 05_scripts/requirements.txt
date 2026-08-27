@@ -1,0 +1,17 @@
+PyYAML>=6.0
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+ultralytics
+albumentations
+pandas
+numpy
+opencv-python
+matplotlib
+notebook
+jupyter
+tqdm
+Pillow
+torch
+torchvision
+ipykernel

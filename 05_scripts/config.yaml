@@ -1,0 +1,17 @@
+project:
+  root_dir: ..
+  raw_data_dir: E:\project\SibDor\01_raw_data\SibDor_markings_dataset
+  output_dataset_dir: 02_yolo_dataset
+  reports_dir: 06_reports
+  seed: 42
+split:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+  mode: copy
+dataset:
+  num_classes: 19
+  image_extensions:
+  - .jpg
+  - .jpeg
+  - .png
