@@ -1,80 +1,82 @@
-# Road Marking Detection
+# Распознавание дорожной разметки (Road Marking Detection)
 
-Automated detection, classification, and geospatial cataloging of horizontal road markings on video from mobile road laboratories using YOLOv8 and ByteTrack.
+Автоматизированная система детекции, классификации и геопространственной привязки горизонтальной дорожной разметки на видео с мобильных дорожных лабораторий с использованием YOLOv8 и ByteTrack.
 
-## Overview
+## Описание
 
-This system processes video recordings in proprietary SFF (Sensor Fusion Format) from mobile road diagnostic laboratories. It detects 26 classes of horizontal road markings per GOST R 51256-2018, tracks objects across frames, deduplicates detections by road chainage (picket), and generates structured CSV reports.
+Система обрабатывает видеозаписи в проприетарном формате SFF (Sensor Fusion Format). Выполняет детекцию 26 классов горизонтальной разметки (по ГОСТ Р 51256-2018), межкадровый трекинг объектов, дедупликацию по дорожному пикетажу и формирует структурированные CSV-отчеты.
 
-**Key features:**
-- YOLOv8 Instance Segmentation / YOLO26s Detection for 26 marking classes
-- ByteTrack multi-object tracking with border-exit detection algorithm
-- Automated dataset pipeline: EDA → split → validation → filtering → oversampling → packaging
-- Native SFF video format support (frames + telemetry: GPS, chainage, timestamps)
-- CSV reports with road chainage binding and annotated demo video generation
+**Ключевые особенности:**
+- YOLOv8 Instance Segmentation / YOLO26s Detection для 26 классов разметки
+- Мульти-объектный трекинг ByteTrack с алгоритмом фиксации выхода за границу кадра
+- Автоматизированный пайплайн подготовки данных: EDA → сплит → валидация → фильтрация → балансировка (oversampling) → упаковка
+- Нативная поддержка SFF (кадры + телеметрия: GPS, пикетаж, временные метки)
+- Генерация CSV-отчетов с привязкой к пикетажу и демо-видео с аннотациями
 
-## Project Structure
+## Структура проекта
 
 ```
-├── 04_notebooks/              # Training & inference notebooks
-│   ├── 01_train_yolov8_seg.py    # YOLOv8n-seg local training (DirectML/CPU)
-│   ├── 02_train_model.py         # Training with visualization & analysis
-│   ├── 03_train_colab.py         # YOLO26s training on Google Colab (T4 GPU)
-│   └── 04_sff_inference.py       # SFF video inference pipeline
+├── 01_raw_data/               # Исходные SFF-видео и выгрузки из CVAT (не отслеживается git). Здесь хранятся сырые данные до обработки.
+├── 02_yolo_dataset/           # Обработанный и готовый датасет в формате YOLO (не отслеживается git). Сюда попадают данные после работы пайплайна (разбитые на train/val/test).
+├── 03_models/                 # Веса обученных моделей и логи обучения (не отслеживается git). Здесь сохраняются лучшие чекпоинты (best.pt, .onnx) и метрики.
 │
-├── 05_scripts/                # Data processing pipeline
-│   ├── config.yaml               # Pipeline configuration
-│   ├── run_pipeline.py           # Master pipeline runner
-│   ├── 01_eda_raw.py             # Exploratory data analysis
-│   ├── 02_split_dataset.py       # Train/val/test split (no data leakage)
-│   ├── 03_validate_dataset.py    # Annotation validation
-│   ├── 04_filter_horizontal_only.py  # Filter horizontal markings (26 of 37 classes)
-│   ├── 05_oversample_rare_classes.py # Class balancing via oversampling
-│   ├── 06_zip_dataset.py         # Dataset packaging
-│   ├── 06_predict_all_images.py  # Batch prediction on images
-│   ├── 07_model_report.py        # Model metrics & charts
-│   └── 08_upload_dataset.py      # Google Drive upload
+├── 04_notebooks/              # Jupyter ноутбуки и скрипты для обучения и инференса
+│   ├── 01_EDA.ipynb              # Разведочный анализ исходных данных
+│   ├── 01_train_yolov8_seg.py    # Локальное обучение YOLOv8n-seg (DirectML/CPU)
+│   ├── 02_train_model.ipynb      # Обучение с визуализацией и анализом
+│   ├── 03_train_colab.py         # Обучение YOLO26s в Google Colab (T4 GPU)
+│   └── 04_sff_inference.py       # Конвейер инференса на SFF-видео
 │
-├── 01_raw_data/               # Raw SFF videos & CVAT exports (not in repo)
-├── 02_yolo_dataset/           # Processed YOLO dataset (not in repo)
-├── 03_models/                 # Trained model weights (not in repo)
-├── 06_inference_results/      # Inference outputs (not in repo)
-└── 06_reports/                # Generated reports (not in repo)
+├── 05_scripts/                # Пайплайн обработки данных
+│   ├── config.yaml               # Конфигурация пайплайна
+│   ├── run_pipeline.py           # Главный скрипт запуска
+│   ├── 01_eda_raw.py             # Анализ данных и проверка категорий
+│   ├── 02_split_dataset.py       # Разбиение без утечки данных (data leakage)
+│   ├── 03_validate_dataset.py    # Валидация аннотаций
+│   ├── 04_filter_horizontal_only.py # Фильтрация только горизонтальной разметки
+│   ├── 05_oversample_rare_classes.py # Балансировка редких классов
+│   ├── 06_zip_dataset.py         # Упаковка датасета в архив
+│   ├── 06_predict_all_images.py  # Пакетный инференс по картинкам
+│   ├── 07_model_report.py        # Генерация отчётов по метрикам
+│   └── 08_upload_dataset.py      # Загрузка датасета на Google Drive
+│
+├── 06_inference_results/      # Результаты работы инференса (не отслеживается git)
+└── 06_reports/                # Сгенерированные отчёты и графики (не отслеживается git)
 ```
 
-## Pipeline
+## Пайплайн
 
-### Data Preparation
+### Подготовка данных
 ```bash
 cd 05_scripts
-python run_pipeline.py --raw_data <path_to_raw_data>
+python run_pipeline.py --raw_data <путь_к_исходным_данным>
 ```
 
-This sequentially runs:
-1. **EDA** — validates category consistency across CVAT tasks
-2. **Split** — groups frames by video segment to prevent data leakage, splits 70/15/15
-3. **Validate** — checks label format, class IDs, cross-split leakage
-4. **Filter** — removes longitudinal markings (classes 1.1–1.11), remaps IDs, rebalances splits
-5. **Oversample** — balances rare classes with color augmentation (Albumentations)
-6. **Package** — creates zip archive for upload
+Выполняет последовательно:
+1. **EDA** — проверка согласованности категорий между выгрузками CVAT.
+2. **Split** — группировка кадров по видео-сегментам (без утечек), разбиение 70/15/15.
+3. **Validate** — проверка форматов, class_id и отсутствия дублей.
+4. **Filter** — удаление продольной разметки (классы 1.1–1.11) и перебалансировка.
+5. **Oversample** — балансировка редких классов цветовыми аугментациями (Albumentations).
+6. **Package** — создание zip-архива для загрузки на облако.
 
-### Training
-- **Local (CPU/DirectML):** `04_notebooks/01_train_yolov8_seg.py` — YOLOv8n-seg
+### Обучение
+- **Локально (CPU/DirectML):** `04_notebooks/01_train_yolov8_seg.py` — YOLOv8n-seg
 - **Google Colab (T4 GPU):** `04_notebooks/03_train_colab.py` — YOLO26s-det
 
-### Inference
-`04_notebooks/04_sff_inference.py` — processes SFF videos:
-- Reads frames and telemetry via SFFReader
-- Runs YOLO detection + ByteTrack tracking
-- BorderExitTracker captures objects exiting frame borders
-- Deduplicates by chainage (merge radius: 30m)
-- Outputs: CSV report + annotated demo video + object snapshots/crops
+### Инференс
+`04_notebooks/04_sff_inference.py` — обработка SFF-видео:
+- Чтение кадров и телеметрии через SFFReader.
+- Детекция YOLO + трекинг ByteTrack.
+- BorderExitTracker фиксирует моменты выхода объектов за границу кадра.
+- Дедупликация объектов по пикетажу (радиус слияния: 30 м).
+- Выход: CSV-отчет, демо-видео с аннотациями и кропы объектов.
 
-## Marking Classes (26)
+## Классы разметки (26)
 
-Horizontal road markings per GOST R 51256-2018:
+Горизонтальная разметка по ГОСТ Р 51256-2018:
 
-| ID | Marking | ID | Marking |
+| ID | Разметка | ID | Разметка |
 |---|---|---|---|
 | 0 | 1.12 | 13 | 1.20 |
 | 1 | 1.13 | 14 | 1.22 |
@@ -90,18 +92,14 @@ Horizontal road markings per GOST R 51256-2018:
 | 11 | 1.18 | 24 | ШП |
 | 12 | 1.19 | 25 | 1.21 |
 
-## Requirements
+## Требования
 
 - Python 3.8+
-- PyTorch (CUDA recommended for training)
+- PyTorch (CUDA рекомендуется для обучения)
 - Ultralytics YOLOv8
 - OpenCV, Pandas, NumPy
-- Albumentations (for oversampling)
+- Albumentations (для oversampling)
 
 ```bash
 pip install -r 05_scripts/requirements.txt
 ```
-
-## License
-
-This project was developed as part of an internship at a road diagnostics organization.
